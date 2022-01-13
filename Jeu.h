@@ -38,4 +38,11 @@ Etat calculerEtat(Partie* partie);
 **/
 int bouclePrincipale(Partie* partie);
 
+
+int checkErrorInput(int input);
+//int checkErrorFullColonne(Partie* partie, int colonne);
+int checkFullMap(Partie* partie);
+int choixPremierJoueur(void);
 int empilementPion(Partie* partie, int colonne);
+int verifierAlignementJ2(Partie* partie, int i, int j);
+int verifierAlignementJ1(Partie* partie, int i, int j);

@@ -6,7 +6,7 @@
 int main(int argc, char** argv){
     Partie partie;
 
-    int tour = 2;
+    int tour = choixPremierJoueur();
     do{
         partie.tour = tour;
         for (int i=0; i<6; i++){
