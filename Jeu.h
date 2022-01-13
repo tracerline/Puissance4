@@ -38,4 +38,4 @@ Etat calculerEtat(Partie* partie);
 **/
 int bouclePrincipale(Partie* partie);
 
-int empilement(Partie* partie, int colonne);
+int empilementPion(Partie* partie, int colonne);
