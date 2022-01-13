@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv){
     Partie partie;
-   
+
     int tour = 2;
     do{
         partie.tour = tour;
@@ -16,6 +16,6 @@ int main(int argc, char** argv){
         }
         tour = 2 - tour + 1;
     } while(bouclePrincipale(&partie));
-    
+
     return 0;
 }
