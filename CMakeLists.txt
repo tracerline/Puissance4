@@ -10,4 +10,4 @@ add_executable(Basecode
         IA.h
         Jeu.c
         Jeu.h
-        main.c)
+        main.c Erreurs.c Erreurs.h Multijoueur/Client.c Multijoueur/Client.h)

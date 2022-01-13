@@ -32,3 +32,5 @@ Arbre* minmax(Partie* partie, int profondeur, int IA);
 ** Destruction propre de l'arbre de décision (la RAM de votre PC vous dit merci)
 **/
 void detruireArbre(Arbre* arbre);
+
+int verifierAlignementIA(Partie* partie, int i, int j);

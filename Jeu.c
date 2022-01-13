@@ -4,42 +4,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "Erreurs.h"
 
 #define COLONNE 7;
 #define LIGNE 6;
-
-// vérifie que le joueur entre un entier entre 1 et 7
-int checkErrorInput(int input) {
-    if (input <= 7 && input >= 1)
-        return 0;
-    return 1;
-}
-
-// vérifie si une colonne est pleine
-int checkErrorFullColonne(Partie* partie, int colonne) {
-    if (partie->plateau[5][colonne] == J1 || partie->plateau[5][colonne] == J2) {
-        printf("zebilamouche");
-        printf("%d", partie->plateau[0][colonne]);
-        return 1;
-    }
-    if (partie->plateau[0][colonne] != VIDE) {
-        printf("%d", partie->plateau[0][colonne]);
-        return 2;
-    }
-    return 0;
-}
-
-// surveille sur la grille est pleine
-int checkFullMap(Partie* partie) {
-    for (int i = 5; i >= 0; i--) {
-        for (int j = 0; j < 7; ++j) {
-            if (partie->plateau[i][j] == VIDE) {
-                return 0;
-            }
-        }
-    }
-    return 1;
-}
 
 void afficher(Partie* partie) {
     printf("\n");
@@ -148,18 +116,22 @@ Etat calculerEtat(Partie* partie) {
             // vérifie la victoire du joueur 1
             if(partie->plateau[i][j] == J1){
                 if (verifierAlignementJ1(partie, i, j) == 1) {
+                    printf("\nJoueur 1 a gagné !\n");
                     return VICTOIRE_J1;
                 }
             }
             // vérifie la victoire du joueur 2
             if (partie->plateau[i][j] == J2){
                 if (verifierAlignementJ2(partie, i, j) == 1) {
+                    printf("\nJoueur 2 a gagné !\n");
                     return VICTOIRE_J2;
                 }
             }
             // vérifie s'il y a une égalité
-            if (checkFullMap(partie) == 1)
+            if (checkFullMap(partie) == 1) {
+                printf("\négalité !\n");
                 return EGALITE;
+            }
         }
     }
     return EN_COURS;
@@ -174,25 +146,28 @@ int bouclePrincipale(Partie* partie) {
     while(1) { // boucle de jeu
         if (calculerEtat(partie) == EN_COURS) { // partie en cours de jeu (pas de victoire ni d'égalité)
             printf("Joueur %d, choisissez un nombre entier entre 1 et 7 : ", partie->tour); // afficher le plateau
-
             scanf("%d", &responsePlayer); // demander au joueur la colonne
+
+            // vérifie que le joueur entre un entier entre 1 et 7
             errorEntier = checkErrorInput(responsePlayer);
             while (errorEntier == 1) {
                 printf("Joueur %d, choisissez un nombre entier entre 1 et 7 : ", partie->tour);
-                scanf("%d", &responsePlayer);
+                scanf("%d", &responsePlayer); // récupère la colonne voulue
                 errorEntier = checkErrorInput(responsePlayer);
             }
+
+            // vérifie si une colonne est pleine
             errorColonne = checkErrorFullColonne(partie, responsePlayer);
-            printf("\n ERROR COLONNE %d \n", errorColonne);
             while (errorColonne == 1) {
                 printf("Joueur %d, cette colonne est pleine, veuillez choisir une autre colonne : ", partie->tour);
                 scanf("%d", &responsePlayer); // récupère la colonne voulue
-                printf("responsePlayer: %d ", responsePlayer);
+                errorColonne = checkErrorFullColonne(partie, responsePlayer);
             }
+
             jouerCoup(partie, responsePlayer - 1); // le joueur joue son coup
             afficher(partie); // on met à jour le plateau
-        } else { // sinon, si victoire ou égalité
-            break; // on stop le jeu
+        } else {
+            break; // End game
         }
     }
     return 0;
