@@ -1,5 +1,5 @@
 //
-// Created by Adam HAISSOUBI-VOGIER on 14/01/2022.
+// Created by Adam HAISSOUBI-VOGIER and Jerome LONGUEBRAY on 14/01/2022.
 //
 
 #ifndef BASECODE_MUSIQUE_H

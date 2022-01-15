@@ -33,4 +33,8 @@ Arbre* minmax(Partie* partie, int profondeur, int IA);
 **/
 void detruireArbre(Arbre* arbre);
 
-int verifierAlignementIA(Partie* partie, int i, int j);
+int AlignementIA(Partie* partie, int i, int j);
+int AlignementJ1(Partie* partie, int i, int j);
+int trieValeurCase(int *valeurCase);
+int checkVictoireIA(Partie* partie, int i, int j);
+int checkVictoireIJ1(Partie* partie, int i, int j);

@@ -8,6 +8,7 @@ typedef enum{VIDE, J1, J2} Case;
 typedef struct{
     Case plateau[6][7]; //la grille de jeu, la ligne 0 est la plus proche du sol
     int tour; //1 ou 2, le joueur dont c'est le tour
+    int choix;
 } Partie;
 /**
 *Partie 1 : moteur du jeu
@@ -42,3 +43,4 @@ int choixPremierJoueur(void);
 int empilementPion(Partie* partie, int colonne);
 int verifierAlignementJ2(Partie* partie, int i, int j);
 int verifierAlignementJ1(Partie* partie, int i, int j);
+int menu(Partie* partie);
