@@ -38,9 +38,9 @@ int init_peer_to__peer(Partie partie) {
     struct sockaddr_in address;
     int k = 0;
     address.sin_family = AF_INET;
-    //address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
-    inet_aton(IPbuffer, &address.sin_addr);
+    //inet_aton(IPbuffer, &address.sin_addr);
     // Creating socket file descriptor
     if ((serveur_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("Connexion échouée : erreur socket");
