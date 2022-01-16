@@ -11,9 +11,9 @@
 #include "Jeu.h"
 #include <stdbool.h>
 #include "Erreurs.h"
-//
 
 char nom[20];
+// variable globale : Port d'écoute pour établir la connexion
 int PORT = 11006;
 char* IPbuffer;
 //#pragma pack(1)
@@ -22,26 +22,31 @@ Partie jeu;
 int coups[200];
 int MODE_DE_JEU_MULTI = -1;
 bool EN_JEU = false;
+// Adresse du destinataire
 char RAdresse[sizeof(char) * 100];
+
 /* Initialisation de la connexion paire à paire
  * Elle permet à chaque joueur d'être client et serveur
  * Ainsi, cette fonction crée un socket serveur pour écouter et accepter les connexions distantes
  * Le PORT sera par défaut le 8888 et tout est fait en IPV4
  * NOTE: Tout se fera en local ; si le joueur n'est pas dans la même LAN il n'y aura pas connexion !
  */
-
 int init_peer_to__peer(Partie partie) {
+    // On créé une partie locale --> afficher les coups de J1 et J2
     setPartie(partie);
+    // on récupère l'IP de la machine runnant le script (vous)
     getIPAddr();
     int ok = 1;
     int serveur_fd, new_socket, valread;
     struct sockaddr_in address;
     int k = 0;
+
+    // paramètrage de la structure socket (addr INET, etc...)
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
-    //inet_aton(IPbuffer, &address.sin_addr);
-    // Creating socket file descriptor
+
+    // on créé le socket serveur
     if ((serveur_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("Connexion échouée : erreur socket");
         exit(EXIT_FAILURE);
@@ -53,55 +58,61 @@ int init_peer_to__peer(Partie partie) {
         pthread_exit(NULL);
         exit(1);
     }
-    // Forcefully attaching socket to the port
 
-
-
-    //Printed the server socket addr and port
-    printf("IP address is: %s\n", inet_ntoa(address.sin_addr));
-    printf("port is: %d\n", (int) ntohs(address.sin_port));
-
+    // on affiche l'@ip et le port ==> debug
+    printf("IP: %s\n", inet_ntoa(address.sin_addr));
+    printf("Port: %d\n", (int) ntohs(address.sin_port));
+    // on bind le socket
     if (bind(serveur_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
         perror("Impossible de bind le socket créé");
         exit(EXIT_FAILURE);
     }
+    // on écoute le socket pour une connexion
     if (listen(serveur_fd, 5) < 0) {
         perror("Erreur: écoute de la socket impossible");
         exit(EXIT_FAILURE);
     }
     int ch;
+    // On créé un système de threads pour les sockets
     pthread_t tid;
     pthread_create(&tid, NULL, &receive_thread,
                    &serveur_fd); //Creating thread to keep receiving message in real time
-    printf("\n***** Mode Multijoueur (LAN uniquement) *****\n1.Héberger\n0.Rejoindre\n");
+    printf("\n***** Mode Multijoueur (LAN uniquement) *****\n1.Héberger\n2.Rejoindre\n");
     printf("\nVotre choix:");
 
     do {
-
+    // Tant que c'est vrai
         scanf("%d", &ch);
         MODE_DE_JEU_MULTI = ch;
-
-
+        // on récupère le choi du mode de multijoueur : héberger/rejoindre
         switch (ch) {
+            // Cas 1 : Héberger
             case 1:
                 printf("En attente d'un deuxième joueur...");
-                sleep(3);
+                sleep(3); // On attend 3sec
+                // On écoute le port pour une connexion
                 recevoir(serveur_fd);
                 break;
-            case 0:
+            // Cas 2 : Rejoindre une partie hébergée
+            case 2:
                 printf("IP du joueur J2 : ");
+                // On demande l'@ip de la machine distante
                 scanf("%s", RAdresse);
+                // On envoie les données
                 envoyer();
                 break;
+            // Sinon: on demande de rejoindre une partie
             default:
                 envoyer();
                 break;
         }
     } while (ch);
+    // Fermeture de la connexion principale
     close(serveur_fd);
-
     return 0;
 }
+
+// On reçoit les données envoyées par la machine source, et on les affiche
 void recevoir(int server_fd) {
     struct sockaddr_in address;
     int valread;
@@ -118,7 +129,7 @@ void recevoir(int server_fd) {
         ready_sockets = current_sockets;
 
         if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0) {
-            perror("Error");
+            perror("Erreur lors de la sélection du socket...");
             exit(EXIT_FAILURE);
         }
 
@@ -133,7 +144,6 @@ void recevoir(int server_fd) {
                         perror("Erreur: la socket n'a pas été acceptée...");
                         exit(EXIT_FAILURE);
                     }else{
-
                         printf("\nJ2 a rejoint la partie !");
                         FD_SET(client_socket, &current_sockets);
                     }
@@ -191,17 +201,15 @@ void recevoir(int server_fd) {
             break;
     }
 }
-// Envoie des messages via les sockets
+
+// Envoie des messages via les sockets à l'hôte distant
 void envoyer() {
     EN_JEU = true;
     char buffer[2000] = {0};
-    //Fetching port number
+    // on assigne le port d'écoute
     int PORT_server = PORT;
     int ok = 1;
     int rep;
-    //IN PEER WE TRUST
-    //printf("Entrer le port du joueur distant:"); //Considering each peer will enter different port
-    //scanf("%d", &PORT_server);
 
     int sock, valread;
     struct sockaddr_in serv_addr;
@@ -215,7 +223,7 @@ void envoyer() {
         }
         checkEtatConnection(sock);
         serv_addr.sin_family = AF_INET;
-         //INADDR_ANY always gives an IP of 0.0.0.0
+         //IPar défaut: 0.0.0.0
         serv_addr.sin_port = htons(PORT_server);
         inet_aton(RAdresse, &serv_addr.sin_addr);
 
@@ -226,7 +234,7 @@ void envoyer() {
         }
          // On check l'état de la socket de connection
         int message; // Le message à envoyer : la colonne sur laquelle on veut jouer
-        printf("\nColonne :");
+        printf("\nColonne :"); // on demande la colonne à jouer
         scanf("%d", &message);
         int errorEntier = checkErrorInput(message);
         while (errorEntier == 1) {
@@ -255,10 +263,10 @@ void envoyer() {
         recv(sock, &rep, sizeof(int), 0);
         jeu.tour = 1;
         jouerCoup(&jeu, rep-1);
-        int etat = checkEtatPartie(jeu, sock);
+        int etat = checkEtatPartie(jeu, sock); // on check l'état de la partie
         if(etat != -1){
-            shutdown(sock, 2);
-            close(sock);
+            shutdown(sock, 2); // shutdown du socket
+            close(sock); // fermeture complète du socket
         }
         printf("\n");
 
@@ -267,7 +275,7 @@ void envoyer() {
     }
 }
 
-//On envoie des datas toutes les 3secondes
+//On envoie des datas toutes les 3secondes (gère les threads)
 void *receive_thread(void *server_fd) {
     int s_fd = *((int *) server_fd);
     while (1) {
@@ -276,6 +284,7 @@ void *receive_thread(void *server_fd) {
     }
 }
 
+// Donne l'IP locale de la machine qui run le programme (vous)
 int getIPAddr(){
     char hostbuffer[256];
     struct hostent *host_entry;

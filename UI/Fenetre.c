@@ -7,7 +7,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "SDL2/Headers/SDL.h"
+#include "SDL2/Headers/SDL_video.h"
+#include "SDL2/Headers/SDL_platform.h"
+#include "SDL2/Headers/SDL_rect.h"
 #define TITRE "Puissance4"
+#define WIDTH 700
+#define HEIGHT 700
 
 int creerFenetre()
 {
@@ -41,21 +46,48 @@ int creerFenetre()
 
     bool is_running = true;
     SDL_Event event;
-    while (is_running) {
+    while(1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 is_running = false;
                 goto Quit;
             }
         }
+        //Dessiner le fond d'ecran
         SDL_Delay(16);
     }
+
+
 
     Quit:
         if(NULL != renderer)
             SDL_DestroyRenderer(renderer);
         if(NULL != window)
             SDL_DestroyWindow(window);
+
         SDL_Quit();
         return statut;
 }
+
+void aff(SDL_Surface *ecran)
+{
+    SDL_Surface *rectangle=NULL;
+
+    int w = WIDTH/3, h=HEIGHT/3,i,j,k,l;
+    SDL_Rect r = { 0 };
+    SDL_BlitSurface(rectangle,NULL,ecran,&r);
+
+    for(k=0,i=0;i<HEIGHT;i+=h,k++)
+    {
+        r.y = i;
+        for(j=0,l=0;j<WIDTH;j+=w,l++)
+        {
+            r.x = j;
+        }
+    }
+}
+
+
+
+
+

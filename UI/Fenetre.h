@@ -4,5 +4,5 @@
 
 #ifndef BASECODE_FENETRE_H
 #define BASECODE_FENETRE_H
-
+int creerFenetre();
 #endif //BASECODE_FENETRE_H
