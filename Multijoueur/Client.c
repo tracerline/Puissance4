@@ -11,12 +11,14 @@
 #include "Jeu.h"
 #include <stdbool.h>
 
+//
+
 char nom[20];
 int PORT = 11006;
 char* IPbuffer;
-#pragma pack(1)
+//#pragma pack(1)
 Partie jeu;
-#pragma pack(0)
+//#pragma pack(0)
 int coups[200];
 int MODE_DE_JEU_MULTI = -1;
 bool EN_JEU = false;
@@ -139,9 +141,10 @@ void recevoir(int server_fd) {
                 } else {
                     //printf("Lecture des données reçues...");
                     recv(i, &buffer, sizeof(int), 0);
-
+                    jouerCoup(&jeu, buffer-1);
+                    afficher(&jeu);
                     printf("\nJ2: colonne %d", buffer);
-                    
+
                     //envoyer();
                     int message;
                     printf("\nColonne :");
@@ -205,10 +208,12 @@ void envoyer() {
         sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
         send(sock, &message, sizeof(int), 0);
         printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message);
-        jouerCoup(&jeu, message);
-        afficher(&jeu);
+        jouerCoup(&jeu, message-1);
+        //afficher(&jeu);
         recv(sock, &rep, sizeof(int), 0);
-        jouerCoup(&jeu, rep);
+        jouerCoup(&jeu, rep-1);
+        printf("\n");
+
         afficher(&jeu);
         printf("J2 a joué : Colonne %d", rep);
         /*shutdown(sock, 1);
@@ -284,6 +289,6 @@ int getIPAddr(){
 }
 
 int setPartie(Partie partie){
-    jeu = partie;
+    memcpy(&partie, &jeu, sizeof(Partie));
     return 0;
 }

@@ -12,17 +12,23 @@
 
 // affiche le plateau
 int afficher(Partie* partie) {
-
+    printf("\n");
     for (int i = 5; i >= 0; i--) {
         for (int j = 0; j < 7; ++j) {
+
             if(partie->plateau[i][j] == VIDE){
                 printf("[   ]");
             }
             else if(partie->plateau[i][j] == J1) {
                 printf("[ X ]");
+
             }
+
             else if(partie->plateau[i][j] == J2) {
                 printf("[ O ]");
+            }
+            else{
+                printf("zbi");
             }
         }
         printf("\n");
@@ -113,20 +119,20 @@ Etat calculerEtat(Partie* partie) {
             // vérifie la victoire du joueur 1
             if(partie->plateau[i][j] == J1){
                 if (verifierAlignementJ1(partie, i, j) == 1) {
-                    printf("\nJoueur 1 a gagné !\n");
+                    printf("\n\033[0;33mJoueur 1 a gagné !\n");
                     return VICTOIRE_J1;
                 }
             }
             // vérifie la victoire du joueur 2
             if (partie->plateau[i][j] == J2){
                 if (verifierAlignementJ2(partie, i, j) == 1) {
-                    printf("\nJoueur 2 a gagné !\n");
+                    printf("\n\033[0;33mJoueur 2 a gagné !\n");
                     return VICTOIRE_J2;
                 }
             }
             // vérifie s'il y a une égalité
             if (checkFullMap(partie) == 1) {
-                printf("\négalité !\n");
+                printf("\n\033[0;33mégalité !\n");
                 return EGALITE;
             }
         }
@@ -143,10 +149,10 @@ int bouclePrincipale(Partie* partie) {
     while(1) { // boucle de jeu
         if (calculerEtat(partie) == EN_COURS) { // partie en cours de jeu (pas de victoire ni d'égalité)
             if(partie->tour != 2) {
-                printf("Joueur %d, choisissez un nombre entier entre 1 et 7 : ", partie->tour); // afficher le plateau
+                printf("\033[0;33mJoueur %d, choisissez un nombre entier entre 1 et 7 : ", partie->tour); // afficher le plateau
                 scanf("%d", &responsePlayer); // demander au joueur la colonne
             } else {
-                printf("Joueur 2 joue...");
+                //printf("Joueur 2 joue...");
                 responsePlayer = evaluation(partie) + 1;
             }
 
