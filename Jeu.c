@@ -17,18 +17,18 @@ int afficher(Partie* partie) {
         for (int j = 0; j < 7; ++j) {
 
             if(partie->plateau[i][j] == VIDE){
-                printf("[   ]");
+                printf("\033[0;37m[   ]");
             }
             else if(partie->plateau[i][j] == J1) {
-                printf("[ X ]");
+                printf("\033[0;31m[ X ]");
 
             }
 
             else if(partie->plateau[i][j] == J2) {
-                printf("[ O ]");
+                printf("\033[0;34m[ O ]");
             }
             else{
-                printf("zbi");
+                printf("[ERR]");
             }
         }
         printf("\n");

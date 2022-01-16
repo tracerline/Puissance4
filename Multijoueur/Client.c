@@ -141,6 +141,7 @@ void recevoir(int server_fd) {
                 } else {
                     //printf("Lecture des données reçues...");
                     recv(i, &buffer, sizeof(int), 0);
+                    jeu.tour = 1;
                     jouerCoup(&jeu, buffer-1);
                     afficher(&jeu);
                     printf("\nJ2: colonne %d", buffer);
@@ -152,6 +153,8 @@ void recevoir(int server_fd) {
                     //scanf("%d", &test);
                     //sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
                     send(i, &message, sizeof(int), 0);
+                    jouerCoup(&jeu, message-1);
+                    jeu.tour = 2;
                     printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message);
                     /*if( 0 != afficher(buffer)){
                         perror("Impossible d'afficher la grille de jeu...");
@@ -207,10 +210,13 @@ void envoyer() {
         //scanf("%d", &test);
         sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
         send(sock, &message, sizeof(int), 0);
+        jeu.tour = 2;
+        jouerCoup(&jeu, message);
         printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message);
         jouerCoup(&jeu, message-1);
         //afficher(&jeu);
         recv(sock, &rep, sizeof(int), 0);
+        jeu.tour = 1;
         jouerCoup(&jeu, rep-1);
         printf("\n");
 
