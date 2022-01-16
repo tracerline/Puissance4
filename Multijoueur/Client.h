@@ -4,8 +4,12 @@
 
 #ifndef BASECODE_CLIENT_H
 #define BASECODE_CLIENT_H
-int init_peer_to__peer();
+#include "Jeu.h"
+
+int init_peer_to__peer(Partie partie);
 void envoyer();
 void *receive_thread(void *server_fd);
-void receiving(int server_fd);
+void recevoir(int server_fd);
+int getIPAddr();
+int setPartie(Partie partie);
 #endif //BASECODE_CLIENT_H

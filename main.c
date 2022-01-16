@@ -3,12 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Multijoueur/Client.h"
+#include "UI/Fenetre.h"
 
 int main(int argc, char** argv){
+
     Partie partie;
+    //creerFenetre();
     int choix_menu_principal = menu(&partie);
-    if(choix_menu_principal == 0){
-        int tour = choixPremierJoueur();
+    int tour = choixPremierJoueur();
+    if(choix_menu_principal == 1){
+
         do{
             partie.tour = tour;
             for (int i=0; i<6; i++){
@@ -19,8 +23,10 @@ int main(int argc, char** argv){
             tour = 2 - tour + 1;
         } while(bouclePrincipale(&partie));
 
+    }else if(choix_menu_principal == 2){
+        init_peer_to__peer(partie);
     }else{
-        init_peer_to__peer();
+        return EXIT_FAILURE;
     }
 
     return 0;

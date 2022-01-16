@@ -11,8 +11,8 @@
 #define LIGNE 6;
 
 // affiche le plateau
-void afficher(Partie* partie) {
-    printf("\n");
+int afficher(Partie* partie) {
+
     for (int i = 5; i >= 0; i--) {
         for (int j = 0; j < 7; ++j) {
             if(partie->plateau[i][j] == VIDE){
@@ -31,6 +31,7 @@ void afficher(Partie* partie) {
         printf("  %d  ", i+1);
     }
     printf("\n");
+    return 0;
 }
 
 int choixPremierJoueur(void) {
@@ -176,7 +177,7 @@ int bouclePrincipale(Partie* partie) {
 
 int menu(Partie* partie){
     printf(" ======== PUISSANCE 4 ======== \n");
-    printf("| 1. Jouer contre l'IA \n | 2. Jouer contre un joueur\n\n Votre choix : ");
+    printf("1. Jouer contre l'IA \n2. Jouer contre un joueur\n\n Votre choix : ");
     scanf("%d", &partie->choix);
     return partie->choix;
 }

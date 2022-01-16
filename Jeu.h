@@ -9,6 +9,7 @@ typedef struct{
     Case plateau[6][7]; //la grille de jeu, la ligne 0 est la plus proche du sol
     int tour; //1 ou 2, le joueur dont c'est le tour
     int choix;
+    char render_plateau;
 } Partie;
 /**
 *Partie 1 : moteur du jeu
@@ -17,7 +18,7 @@ typedef struct{
 /**
 *Affichage de la partie en ligne de commande
 **/
-void afficher(Partie* partie);
+int afficher(Partie* partie);
 /**
 *Fonction appliquant le coup du joueur sur le plateau, et changeant la valeur de partie->tour (1->2 ou 2->1)
 *Renvoie 0 si le coup est impossible, 1 sinon
