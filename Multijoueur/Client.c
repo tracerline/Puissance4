@@ -141,6 +141,7 @@ void recevoir(int server_fd) {
                     recv(i, &buffer, sizeof(int), 0);
 
                     printf("\nJ2: colonne %d", buffer);
+                    
                     //envoyer();
                     int message;
                     printf("\nColonne :");
@@ -204,7 +205,11 @@ void envoyer() {
         sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
         send(sock, &message, sizeof(int), 0);
         printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message);
+        jouerCoup(&jeu, message);
+        afficher(&jeu);
         recv(sock, &rep, sizeof(int), 0);
+        jouerCoup(&jeu, rep);
+        afficher(&jeu);
         printf("J2 a joué : Colonne %d", rep);
         /*shutdown(sock, 1);
         close(sock);
