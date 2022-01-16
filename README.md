@@ -2,6 +2,7 @@
 
 @@@@@@ PUISSANCE 4 @@@@@@@
 Collaboreturs: Adam Haissoubi-Vogier et Jérôme Longuebray
+Git: https://github.com/tracerline/Puissance4 
 
 ------------------------------------------------------------------
 
