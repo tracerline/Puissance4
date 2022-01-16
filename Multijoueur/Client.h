@@ -12,4 +12,6 @@ void *receive_thread(void *server_fd);
 void recevoir(int server_fd);
 int getIPAddr();
 int setPartie(Partie partie);
+int checkEtatPartie(Partie partie, int sock);
+void checkEtatConnection(int sock);
 #endif //BASECODE_CLIENT_H

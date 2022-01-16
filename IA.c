@@ -173,21 +173,22 @@ int evaluation(Partie* partie) {
 
                 // IA définit la colonne qui bloque la vitoire de J1
                 if (checkVictoireJ1(partie, i, j) == 1) {
-                    printf("\nJE TE BLOQUE !\n");
+                    //printf("\nJE TE BLOQUE !\n");
                     valeurCase[counterValeurCase] = 900;
                     break;
                 }
                 // IA définit la colonne qui gagne
                 if (checkVictoireIA(partie, i, j) == 1) {
-                    printf("\nJE GAGNE !\n");
+                    //printf("\nJE GAGNE !\n");
                     valeurCase[counterValeurCase] = 1000;
                     break;
                 }
                 counterValeurCase++;
 
-                for (int i = 0; i <= counterValeurCase; i++) {
+                /*for (int i = 0; i <= counterValeurCase; i++) {
                     printf("\nValeur tableau : %d    et le counter : %d\n", valeurCase[counterValeurCase], counterValeurCase);
                 }
+                 */
 
                 break;
             }

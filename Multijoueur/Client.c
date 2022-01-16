@@ -10,7 +10,7 @@
 #include "Client.h"
 #include "Jeu.h"
 #include <stdbool.h>
-
+#include "Erreurs.h"
 //
 
 char nom[20];
@@ -134,11 +134,12 @@ void recevoir(int server_fd) {
                         exit(EXIT_FAILURE);
                     }else{
 
-                        printf("J2 a rejoint la partie !");
+                        printf("\nJ2 a rejoint la partie !");
                         FD_SET(client_socket, &current_sockets);
                     }
 
                 } else {
+                    checkEtatConnection(server_fd);
                     //printf("Lecture des données reçues...");
                     recv(i, &buffer, sizeof(int), 0);
                     jeu.tour = 1;
@@ -152,9 +153,29 @@ void recevoir(int server_fd) {
                     scanf("%d", &message);
                     //scanf("%d", &test);
                     //sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
+                    int errorEntier = checkErrorInput(message);
+                    while (errorEntier == 1) {
+                        printf("Vous (J%d): choisissez un nombre entier entre 1 et 7 : ", jeu.tour);
+                        scanf("%d", &message); // récupère la colonne voulue
+                        errorEntier = checkErrorInput(message);
+                    }
+
+                    // vérifie si une colonne est pleine
+                    int errorColonne = checkErrorFullColonne(&jeu, message);
+                    while (errorColonne == 1) {
+                        printf("Joueur %d, cette colonne est pleine, veuillez choisir une autre colonne : ", jeu.tour);
+                        scanf("%d", &message); // récupère la colonne voulue
+                        errorColonne = checkErrorFullColonne(&jeu, message);
+                    }
+
                     send(i, &message, sizeof(int), 0);
-                    jouerCoup(&jeu, message-1);
                     jeu.tour = 2;
+                    jouerCoup(&jeu, message-1);
+                    int etat =  checkEtatPartie(jeu, server_fd);
+                    if(etat != -1){
+                        shutdown(server_fd, 2);
+                        close(server_fd);
+                    }
                     printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message);
                     /*if( 0 != afficher(buffer)){
                         perror("Impossible d'afficher la grille de jeu...");
@@ -182,7 +203,7 @@ void envoyer() {
     //printf("Entrer le port du joueur distant:"); //Considering each peer will enter different port
     //scanf("%d", &PORT_server);
 
-    int sock = 0, valread;
+    int sock, valread;
     struct sockaddr_in serv_addr;
     int test;
 
@@ -192,7 +213,7 @@ void envoyer() {
             printf("\n Création de la connexion par socket échouée \n");
             return;
         }
-
+        checkEtatConnection(sock);
         serv_addr.sin_family = AF_INET;
          //INADDR_ANY always gives an IP of 0.0.0.0
         serv_addr.sin_port = htons(PORT_server);
@@ -203,61 +224,47 @@ void envoyer() {
             exit(EXIT_FAILURE);
             return;
         }
-
-        int message;
+         // On check l'état de la socket de connection
+        int message; // Le message à envoyer : la colonne sur laquelle on veut jouer
         printf("\nColonne :");
         scanf("%d", &message);
+        int errorEntier = checkErrorInput(message);
+        while (errorEntier == 1) {
+            printf("Vous (J%d): choisissez un nombre entier entre 1 et 7 : ", jeu.tour);
+            scanf("%d", &message); // récupère la colonne voulue
+            errorEntier = checkErrorInput(message);
+        }
+
+        // vérifie si une colonne est pleine
+        int errorColonne = checkErrorFullColonne(&jeu, message);
+        while (errorColonne == 1) {
+            printf("Joueur %d, cette colonne est pleine, veuillez choisir une autre colonne : ", jeu.tour);
+            scanf("%d", &message); // récupère la colonne voulue
+            errorColonne = checkErrorFullColonne(&jeu, message);
+        }
         //scanf("%d", &test);
-        sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
+        //sprintf(buffer, "%s[PORT:%d] says: %c", nom, PORT, message);
+
         send(sock, &message, sizeof(int), 0);
-        jeu.tour = 2;
-        jouerCoup(&jeu, message);
-        printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message);
+        jeu.tour = 2; // Tour du J2
+
+        printf("\nVous: Colonne %d\nEn attente du coup du J2 \n", message); // On demande la colonne
         jouerCoup(&jeu, message-1);
+
         //afficher(&jeu);
         recv(sock, &rep, sizeof(int), 0);
         jeu.tour = 1;
         jouerCoup(&jeu, rep-1);
+        int etat = checkEtatPartie(jeu, sock);
+        if(etat != -1){
+            shutdown(sock, 2);
+            close(sock);
+        }
         printf("\n");
 
         afficher(&jeu);
         printf("J2 a joué : Colonne %d", rep);
-        /*shutdown(sock, 1);
-        close(sock);
-
-        int serveur_fd, new_socket;
-        struct sockaddr_in address;
-        int k = 0;
-
-        // Creating socket file descriptor
-        if ((serveur_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-            perror("Connexion échouée : erreur socket");
-            exit(EXIT_FAILURE);
-        }
-
-
-        // Forcefully attaching socket to the port
-
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        sleep(5);
-        address.sin_port = htons(PORT);
-        //EN_JEU = true;
-        if (bind(serveur_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
-            perror("Impossible de bind le socket créé");
-            exit(EXIT_FAILURE);
-        }
-        if (listen(sock, 5) < 0) {
-            perror("Erreur: écoute de la socket impossible");
-            exit(EXIT_FAILURE);
-        }
-        recevoir(serveur_fd);*/
     }
-
-    // On recréé une socket d'écoute pour la réponse du joueur J2
-
-    //recevoir(serveur_fd);
-
 }
 
 //On envoie des datas toutes les 3secondes
@@ -271,25 +278,14 @@ void *receive_thread(void *server_fd) {
 
 int getIPAddr(){
     char hostbuffer[256];
-
     struct hostent *host_entry;
     int hostname;
 
-    // To retrieve hostname
     hostname = gethostname(hostbuffer, sizeof(hostbuffer));
-    //checkHostName(hostname);
-
-    // To retrieve host information
     host_entry = gethostbyname(hostbuffer);
-    //checkHostEntry(host_entry);
 
-    // To convert an Internet network
-    // address into ASCII string
     IPbuffer = inet_ntoa(*((struct in_addr*)
             host_entry->h_addr_list[0]));
-
-    //printf("Hostname: %s\n", hostbuffer);
-    //printf("Host IP: %s", IPbuffer);
 
     return 0;
 }
@@ -298,3 +294,48 @@ int setPartie(Partie partie){
     memcpy(&partie, &jeu, sizeof(Partie));
     return 0;
 }
+
+int checkEtatPartie(Partie partie, int sock){
+    if(calculerEtat(&partie) == VICTOIRE_J1){
+        printf("J2 A GAGNÉ ! \n");
+        exit(EXIT_SUCCESS);
+        return VICTOIRE_J1;
+    }
+    else if(calculerEtat(&partie) == VICTOIRE_J2){
+        printf("J1 A GAGNÉ ! \n");
+        exit(EXIT_SUCCESS);
+        return VICTOIRE_J2;
+    }
+    else if(calculerEtat(&partie) == EGALITE){
+        printf("Fin de la partie: ÉGALITÉ\n");
+        exit(EXIT_SUCCESS);
+        return EGALITE;
+    }
+    else{
+        return -1;
+    }
+}
+
+void checkEtatConnection(int sock){
+    int error = 0;
+    socklen_t len = sizeof (error);
+    int retval = getsockopt (sock, SOL_SOCKET, SO_ERROR, &error, &len);
+
+    if (retval != 0) {
+        /* there was a problem getting the error code */
+        fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+        shutdown(sock, 3);
+        close(sock);
+        return;
+    }
+
+    if (error != 0) {
+        /* socket has a non zero error status */
+        fprintf(stderr, "socket error: %s\n", strerror(error));
+        shutdown(sock, 3);
+        close(sock);
+        return;
+    }
+}
+
+
